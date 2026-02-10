@@ -40,6 +40,11 @@
       "name": "Administrador",
       "role": "admin",
       "password": "V.27962617"
+    },
+    {
+      "id": "u1770747662621",
+      "name": "Pepito",
+      "role": "teacher"
     }
   ],
   "subjects": [
@@ -350,5 +355,5 @@
       "group": "A"
     }
   ],
-  "lastUpdated": "2026-02-10T18:21:02.665Z"
+  "lastUpdated": "2026-02-10T18:21:04.897Z"
 }
