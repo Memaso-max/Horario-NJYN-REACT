@@ -1,0 +1,55 @@
+{
+  "users": [
+    { "id": "t1", "name": "Prof. Delia Henriche", "role": "teacher" },
+    { "id": "t2", "name": "Prof. Milagros Acosta", "role": "teacher" },
+    { "id": "t3", "name": "Prof. Cruz Sánchez", "role": "teacher" },
+    { "id": "t4", "name": "Prof. Yelifer Henriche", "role": "teacher" },
+    { "id": "t5", "name": "Prof. Suahil Lezama", "role": "teacher" },
+    { "id": "t6", "name": "Prof. Ivan Valdez", "role": "teacher" },
+    { "id": "t7", "name": "Prof. Andreina Oviedo", "role": "teacher" },
+    { "id": "admin1", "name": "Administrador", "role": "admin", "password": "V.27962617" }
+  ],
+  "subjects": [
+    { "id": "s1", "name": "Matemáticas", "teacherId": "t1", "color": "#FF6B6B" },
+    { "id": "s2", "name": "Física", "teacherId": "t1", "color": "#4ECDC4" },
+    { "id": "s3", "name": "Matemáticas", "teacherId": "t2", "color": "#45B7D1" },
+    { "id": "s4", "name": "Inglés", "teacherId": "t3", "color": "#FFA07A" },
+    { "id": "s5", "name": "Castellano", "teacherId": "t4", "color": "#FFD93D" },
+    { "id": "s6", "name": "G.H.C", "teacherId": "t5", "color": "#6BCF7F" },
+    { "id": "s7", "name": "Educación Física", "teacherId": "t6", "color": "#C77DFF" },
+    { "id": "s8", "name": "Biología", "teacherId": "t7", "color": "#FF8FAB" },
+    { "id": "s9", "name": "C.S Naturales", "teacherId": "t7", "color": "#FF8FAB" }
+  ],
+  "schedule": [
+    { "id": "c1", "subjectId": "s1", "day": 1, "startTime": "07:00", "endTime": "07:50", "room": "101", "grade": "1", "group": "A" },
+    { "id": "c2", "subjectId": "s2", "day": 1, "startTime": "07:50", "endTime": "08:40", "room": "102", "grade": "1", "group": "A" },
+    { "id": "c3", "subjectId": "s3", "day": 1, "startTime": "08:40", "endTime": "09:30", "room": "103", "grade": "1", "group": "A" },
+    { "id": "c4", "subjectId": "s4", "day": 1, "startTime": "10:00", "endTime": "10:50", "room": "101", "grade": "1", "group": "A" },
+    { "id": "c5", "subjectId": "s5", "day": 1, "startTime": "10:50", "endTime": "11:40", "room": "104", "grade": "1", "group": "A" },
+
+    { "id": "c6", "subjectId": "s3", "day": 2, "startTime": "07:00", "endTime": "07:50", "room": "103", "grade": "1", "group": "A" },
+    { "id": "c7", "subjectId": "s1", "day": 2, "startTime": "07:50", "endTime": "08:40", "room": "101", "grade": "1", "group": "A" },
+    { "id": "c8", "subjectId": "s6", "day": 2, "startTime": "08:40", "endTime": "09:30", "room": "Cancha", "grade": "1", "group": "A" },
+    { "id": "c9", "subjectId": "s2", "day": 2, "startTime": "10:00", "endTime": "10:50", "room": "102", "grade": "1", "group": "A" },
+    { "id": "c10", "subjectId": "s7", "day": 2, "startTime": "10:50", "endTime": "11:40", "room": "105", "grade": "1", "group": "A" },
+
+    { "id": "c11", "subjectId": "s5", "day": 3, "startTime": "07:00", "endTime": "07:50", "room": "104", "grade": "1", "group": "A" },
+    { "id": "c12", "subjectId": "s4", "day": 3, "startTime": "07:50", "endTime": "08:40", "room": "101", "grade": "1", "group": "A" },
+    { "id": "c13", "subjectId": "s1", "day": 3, "startTime": "08:40", "endTime": "09:30", "room": "101", "grade": "1", "group": "A" },
+    { "id": "c14", "subjectId": "s8", "day": 3, "startTime": "10:00", "endTime": "10:50", "room": "106", "grade": "1", "group": "A" },
+    { "id": "c15", "subjectId": "s3", "day": 3, "startTime": "10:50", "endTime": "11:40", "room": "103", "grade": "1", "group": "A" },
+
+    { "id": "c16", "subjectId": "s2", "day": 4, "startTime": "07:00", "endTime": "07:50", "room": "102", "grade": "1", "group": "A" },
+    { "id": "c17", "subjectId": "s1", "day": 4, "startTime": "07:50", "endTime": "08:40", "room": "101", "grade": "1", "group": "A" },
+    { "id": "c18", "subjectId": "s5", "day": 4, "startTime": "08:40", "endTime": "09:30", "room": "104", "grade": "1", "group": "A" },
+    { "id": "c19", "subjectId": "s3", "day": 4, "startTime": "10:00", "endTime": "10:50", "room": "103", "grade": "1", "group": "A" },
+    { "id": "c20", "subjectId": "s4", "day": 4, "startTime": "10:50", "endTime": "11:40", "room": "101", "grade": "1", "group": "A" },
+
+    { "id": "c21", "subjectId": "s6", "day": 5, "startTime": "07:00", "endTime": "07:50", "room": "Cancha", "grade": "1", "group": "A" },
+    { "id": "c22", "subjectId": "s7", "day": 5, "startTime": "07:50", "endTime": "08:40", "room": "105", "grade": "1", "group": "A" },
+    { "id": "c23", "subjectId": "s2", "day": 5, "startTime": "08:40", "endTime": "09:30", "room": "102", "grade": "1", "group": "A" },
+    { "id": "c24", "subjectId": "s1", "day": 5, "startTime": "10:00", "endTime": "10:50", "room": "101", "grade": "1", "group": "A" },
+    { "id": "c25", "subjectId": "s8", "day": 5, "startTime": "10:50", "endTime": "11:40", "room": "106", "grade": "1", "group": "A" }
+  ],
+  "lastUpdated": "2026-02-09T00:00:00Z"
+}
