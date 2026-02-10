@@ -2,20 +2,39 @@ import { DAYS_OF_WEEK, SCHOOL_DAYS } from '@/constants/schedule';
 import { useAllGradeGroups, useApp, useGradeGroupSchedule } from '@/contexts/AppContext';
 import { useRouter } from 'expo-router';
 import { GraduationCap, LogOut } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ScheduleCard } from './ScheduleCard';
 
 export function StudentScheduleView() {
   const router = useRouter();
-  const { logout } = useApp();
+  const { logout, currentUser } = useApp();
   const allGradeGroups = useAllGradeGroups();
-  const [selectedGradeGroup, setSelectedGradeGroup] = useState<string>(allGradeGroups[0] || '');
+  const [selectedGradeGroup, setSelectedGradeGroup] = useState<string>('');
   const today = new Date().getDay();
   const [selectedDay, setSelectedDay] = useState<number>(
     SCHOOL_DAYS.includes(today as any) ? today : 1
   );
   
+  useEffect(() => {
+    if (currentUser?.role === 'student') {
+      const id = currentUser.id || '';
+      if (id.startsWith('student-')) {
+        setSelectedGradeGroup(id.replace('student-', ''));
+        return;
+      }
+      const m = (currentUser.name || '').match(/^(\d+\w?)/);
+      if (m) {
+        setSelectedGradeGroup(m[1]);
+        return;
+      }
+    }
+
+    if (!selectedGradeGroup && allGradeGroups.length > 0) {
+      setSelectedGradeGroup(allGradeGroups[0]);
+    }
+  }, [currentUser, allGradeGroups]);
+
   const gradeGroupSchedule = useGradeGroupSchedule(selectedGradeGroup, selectedDay);
 
   const handleLogout = async () => {
