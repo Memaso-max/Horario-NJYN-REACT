@@ -1,11 +1,12 @@
 import { DAYS_OF_WEEK, SCHOOL_DAYS, SUBJECT_COLORS } from '@/constants/schedule';
 import { useAllGradeGroups, useApp } from '@/contexts/AppContext';
 import { ClassPeriod, Subject, User, UserRole } from '@/types';
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { BookOpen, Calendar, LogOut, Plus, Settings, Trash2, Users, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, BackHandler, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 type AdminTab = 'users' | 'subjects' | 'schedule';
 
@@ -14,6 +15,7 @@ export function AdminPanel() {
   const { logout } = useApp();
   const { forceSync, lastUpdated } = useApp();
   const router = useRouter();
+  const navigation = useNavigation();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
@@ -21,6 +23,28 @@ export function AdminPanel() {
     await logout();
     router.replace('/welcome');
   };
+
+  // Handle Android hardware back: navigate back if possible, otherwise exit app from root
+  useEffect(() => {
+    const onBackPress = () => {
+      try {
+        // @ts-ignore navigation may be typed loosely here
+        if (navigation && typeof navigation.canGoBack === 'function' && navigation.canGoBack()) {
+          // prefer navigation goBack
+          // @ts-ignore
+          navigation.goBack();
+        } else {
+          BackHandler.exitApp();
+        }
+      } catch (e) {
+        BackHandler.exitApp();
+      }
+      return true; // handled
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -988,9 +1012,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     backgroundColor: '#F8F9FA',
     borderRadius: 8,
+    zIndex: 2,
   },
   syncText: {
     color: '#2C3E50',
     fontWeight: '600' as const,
+  },
+  logoutButton: {
+    padding: 8,
+    zIndex: 2,
   },
 });
