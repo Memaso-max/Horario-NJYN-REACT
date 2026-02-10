@@ -1,6 +1,7 @@
 import { DAYS_OF_WEEK, SCHOOL_DAYS, SUBJECT_COLORS } from '@/constants/schedule';
 import { useAllGradeGroups, useApp } from '@/contexts/AppContext';
 import { ClassPeriod, Subject, User, UserRole } from '@/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -18,9 +19,10 @@ export function AdminPanel() {
   const navigation = useNavigation();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
-  const [tokenModalVisible, setTokenModalVisible] = useState(false);
-  const [tokenInput, setTokenInput] = useState('');
   const [savingGit, setSavingGit] = useState(false);
+  const [tokenModalVisible, setTokenModalVisible] = useState(false);
+  const [tokenValue, setTokenValue] = useState<string>('');
+  const [loadingToken, setLoadingToken] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -52,9 +54,33 @@ export function AdminPanel() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Settings size={28} color="#E67E22" strokeWidth={2.5} />
+          <TouchableOpacity onPress={async () => {
+            setTokenModalVisible(true);
+            setLoadingToken(true);
+            try {
+              const t = await AsyncStorage.getItem('githubToken');
+              setTokenValue(t || '');
+            } catch (e) {
+              console.log('failed read token', e);
+            } finally {
+              setLoadingToken(false);
+            }
+          }}>
+            <Settings size={28} color="#E67E22" strokeWidth={2.5} />
+          </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setTokenModalVisible(true)}
+            onPress={async () => {
+              setSavingGit(true);
+              try {
+                await pushToGitHub?.();
+                Alert.alert('Guardado', 'Datos guardados en GitHub correctamente');
+              } catch (e: any) {
+                const msg = e?.message || 'No fue posible guardar';
+                Alert.alert('Error', `No fue posible guardar en GitHub: ${msg}`);
+              } finally {
+                setSavingGit(false);
+              }
+            }}
             style={styles.syncButton}
           >
             <Text style={styles.syncText}>{savingGit ? 'Guardando...' : 'Guardar en Git'}</Text>
@@ -101,46 +127,47 @@ export function AdminPanel() {
         </View>
       </View>
 
-      <Modal visible={tokenModalVisible} transparent animationType="fade">
-        <View style={styles.confirmOverlay}>
-          <View style={styles.confirmBox}>
-            <Text style={styles.confirmTitle}>Token GitHub</Text>
-            <Text style={styles.confirmMessage}>Ingresa un Personal Access Token con permisos de `repo` para guardar los datos en GitHub. Se guardará localmente.</Text>
-            <TextInput
-              style={[styles.input, { marginTop: 8 }]}
-              value={tokenInput}
-              onChangeText={setTokenInput}
-              placeholder="ghp_..."
-              autoCapitalize="none"
-              secureTextEntry
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
-              <TouchableOpacity style={[styles.confirmButton, styles.confirmCancel]} onPress={() => { setTokenModalVisible(false); setTokenInput(''); }}>
-                <Text style={styles.confirmCancelText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.confirmButton, styles.confirmDelete]}
-                onPress={async () => {
-                  setSavingGit(true);
-                  try {
-                    await pushToGitHub?.(tokenInput, 'Manual save from app');
-                    Alert.alert('Guardado', 'Datos guardados en GitHub correctamente');
+        <Modal visible={tokenModalVisible} transparent animationType="fade">
+          <View style={styles.confirmOverlay}>
+            <View style={styles.confirmBox}>
+              <Text style={styles.confirmTitle}>Ajustes - Token GitHub</Text>
+              <Text style={styles.confirmMessage}>Guarda aquí tu Personal Access Token (permiso `repo`). Se usará automáticamente para subir cambios.</Text>
+              <TextInput
+                style={[styles.input, { marginTop: 8 }]}
+                value={tokenValue}
+                onChangeText={setTokenValue}
+                placeholder="ghp_..."
+                autoCapitalize="none"
+                secureTextEntry
+              />
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+                <TouchableOpacity style={[styles.confirmButton, styles.confirmCancel]} onPress={() => setTokenModalVisible(false)}>
+                  <Text style={styles.confirmCancelText}>Cerrar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.confirmButton, styles.confirmDelete]} onPress={async () => {
+                  if (!tokenValue) {
+                    // remove token
+                    await AsyncStorage.removeItem('githubToken');
+                    Alert.alert('Token', 'Token eliminado');
                     setTokenModalVisible(false);
-                    setTokenInput('');
-                  } catch (e: any) {
-                    const msg = e?.message || 'Error desconocido';
-                    Alert.alert('Error', `No fue posible guardar en GitHub: ${msg}`);
-                  } finally {
-                    setSavingGit(false);
+                    return;
                   }
-                }}
-              >
-                <Text style={styles.confirmDeleteText}>Guardar</Text>
-              </TouchableOpacity>
+                  try {
+                    await AsyncStorage.setItem('githubToken', tokenValue);
+                    Alert.alert('Token', 'Token guardado correctamente');
+                    setTokenModalVisible(false);
+                  } catch (e: any) {
+                    Alert.alert('Error', `No fue posible guardar el token: ${e?.message || e}`);
+                  }
+                }}>
+                  <Text style={styles.confirmDeleteText}>{tokenValue ? 'Guardar' : 'Eliminar'}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+
+      
 
       <View style={styles.content}>
         {activeTab === 'schedule' && <ScheduleManagement />}

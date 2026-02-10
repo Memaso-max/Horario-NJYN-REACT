@@ -23,6 +23,14 @@ export const [AppProvider, useApp] = createContextHook(() => {
     loadData();
   }, []);
 
+  // Periodic check for remote updates (polling). Runs every 60 seconds.
+  useEffect(() => {
+    const id = setInterval(() => {
+      checkForUpdates().catch(() => {});
+    }, 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const loadData = async () => {
     try {
       const storedUser = await AsyncStorage.getItem('currentUser');
@@ -130,30 +138,35 @@ export const [AppProvider, useApp] = createContextHook(() => {
     const newUsers = [...users, user];
     setUsers(newUsers);
     await AsyncStorage.setItem('users', JSON.stringify(newUsers));
+    await saveLocalMetaAndPush();
   };
 
   const updateUser = async (userId: string, updates: Partial<User>) => {
     const newUsers = users.map(u => u.id === userId ? { ...u, ...updates } : u);
     setUsers(newUsers);
     await AsyncStorage.setItem('users', JSON.stringify(newUsers));
+    await saveLocalMetaAndPush();
   };
 
   const deleteUser = async (userId: string) => {
     const newUsers = users.filter(u => u.id !== userId);
     setUsers(newUsers);
     await AsyncStorage.setItem('users', JSON.stringify(newUsers));
+    await saveLocalMetaAndPush();
   };
 
   const addSubject = async (subject: Subject) => {
     const newSubjects = [...subjects, subject];
     setSubjects(newSubjects);
     await AsyncStorage.setItem('subjects', JSON.stringify(newSubjects));
+    await saveLocalMetaAndPush();
   };
 
   const updateSubject = async (subjectId: string, updates: Partial<Subject>) => {
     const newSubjects = subjects.map(s => s.id === subjectId ? { ...s, ...updates } : s);
     setSubjects(newSubjects);
     await AsyncStorage.setItem('subjects', JSON.stringify(newSubjects));
+    await saveLocalMetaAndPush();
   };
 
   const deleteSubject = async (subjectId: string) => {
@@ -163,25 +176,43 @@ export const [AppProvider, useApp] = createContextHook(() => {
     setSchedule(newSchedule);
     await AsyncStorage.setItem('subjects', JSON.stringify(newSubjects));
     await AsyncStorage.setItem('schedule', JSON.stringify(newSchedule));
+    await saveLocalMetaAndPush();
   };
 
   const addClassPeriod = async (classPeriod: ClassPeriod) => {
     const newSchedule = [...schedule, classPeriod];
     setSchedule(newSchedule);
     await AsyncStorage.setItem('schedule', JSON.stringify(newSchedule));
+    await saveLocalMetaAndPush();
   };
 
   const updateClassPeriod = async (periodId: string, updates: Partial<ClassPeriod>) => {
     const newSchedule = schedule.map(c => c.id === periodId ? { ...c, ...updates } : c);
     setSchedule(newSchedule);
     await AsyncStorage.setItem('schedule', JSON.stringify(newSchedule));
+    await saveLocalMetaAndPush();
   };
 
   const deleteClassPeriod = async (periodId: string) => {
     const newSchedule = schedule.filter(c => c.id !== periodId);
     setSchedule(newSchedule);
     await AsyncStorage.setItem('schedule', JSON.stringify(newSchedule));
+    await saveLocalMetaAndPush();
   };
+
+  // Update local lastUpdated timestamp and attempt to push to GitHub if token exists
+  async function saveLocalMetaAndPush() {
+    const newLast = new Date().toISOString();
+    setLastUpdated(newLast);
+    await AsyncStorage.setItem('lastUpdated', newLast);
+    try {
+      // pushToGitHub is defined later; attempt it if available
+      // @ts-ignore
+      if (typeof pushToGitHub === 'function') await pushToGitHub();
+    } catch (e) {
+      console.log('pushToGitHub failed:', e);
+    }
+  }
 
   // Push current data to GitHub using the Contents API. Requires a Personal Access Token with repo permissions.
   const pushToGitHub = async (token?: string, commitMessage?: string) => {
