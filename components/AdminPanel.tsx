@@ -13,25 +13,27 @@ type AdminTab = 'users' | 'subjects' | 'schedule';
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>('schedule');
   const { logout } = useApp();
-  const { forceSync, lastUpdated } = useApp();
+  const { forceSync, lastUpdated, pushToGitHub } = useApp();
   const router = useRouter();
   const navigation = useNavigation();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [tokenModalVisible, setTokenModalVisible] = useState(false);
+  const [tokenInput, setTokenInput] = useState('');
+  const [savingGit, setSavingGit] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.replace('/welcome');
   };
 
-  // Handle Android hardware back: navigate back if possible, otherwise exit app from root
+  
   useEffect(() => {
     const onBackPress = () => {
       try {
-        // @ts-ignore navigation may be typed loosely here
+
         if (navigation && typeof navigation.canGoBack === 'function' && navigation.canGoBack()) {
-          // prefer navigation goBack
-          // @ts-ignore
+        
           navigation.goBack();
         } else {
           BackHandler.exitApp();
@@ -39,7 +41,7 @@ export function AdminPanel() {
       } catch (e) {
         BackHandler.exitApp();
       }
-      return true; // handled
+      return true; 
     };
 
     const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
@@ -49,63 +51,96 @@ export function AdminPanel() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Settings size={28} color="#E67E22" strokeWidth={2.5} />
-        <Text style={styles.headerTitle}>Panel de Administración</Text>
-        <TouchableOpacity
-          onPress={async () => {
-            setSyncError(null);
-            setIsSyncing(true);
-            try {
-              await forceSync?.();
-              Alert.alert('Sincronización', 'Actualizado correctamente');
-            } catch (e: any) {
-              const msg = e?.message || 'No fue posible sincronizar';
-              setSyncError(msg);
-              Alert.alert('Sincronización', `No fue posible sincronizar: ${msg}`);
-            } finally {
-              setIsSyncing(false);
-            }
-          }}
-          style={styles.syncButton}
-        >
-          <Text style={styles.syncText}>{isSyncing ? 'Sincronizando...' : 'Sincronizar'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <LogOut size={24} color="#E67E22" />
-        </TouchableOpacity>
+        <View style={styles.headerTop}>
+          <Settings size={28} color="#E67E22" strokeWidth={2.5} />
+          <TouchableOpacity
+            onPress={() => setTokenModalVisible(true)}
+            style={styles.syncButton}
+          >
+            <Text style={styles.syncText}>{savingGit ? 'Guardando...' : 'Guardar en Git'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <LogOut size={24} color="#E67E22" />
+          </TouchableOpacity>
+        </View>
+        <View> 
+          <Text style={styles.headerTitle}>Panel de Administración</Text>
+        </View>
+
+        <View style={styles.tabBar}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'schedule' && styles.tabActive]}
+            onPress={() => setActiveTab('schedule')}
+          >
+            <Calendar size={20} color={activeTab === 'schedule' ? '#fff' : '#7F8C8D'} />
+            <Text style={[styles.tabText, activeTab === 'schedule' && styles.tabTextActive]}>
+              Horarios
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'subjects' && styles.tabActive]}
+            onPress={() => setActiveTab('subjects')}
+          >
+            <BookOpen size={20} color={activeTab === 'subjects' ? '#fff' : '#7F8C8D'} />
+            <Text style={[styles.tabText, activeTab === 'subjects' && styles.tabTextActive]}>
+              Materias
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'users' && styles.tabActive]}
+            onPress={() => setActiveTab('users')}
+          >
+            <Users size={20} color={activeTab === 'users' ? '#fff' : '#7F8C8D'} />
+            <Text style={[styles.tabText, activeTab === 'users' && styles.tabTextActive]}>
+              Usuarios
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'schedule' && styles.tabActive]}
-          onPress={() => setActiveTab('schedule')}
-        >
-          <Calendar size={20} color={activeTab === 'schedule' ? '#fff' : '#7F8C8D'} />
-          <Text style={[styles.tabText, activeTab === 'schedule' && styles.tabTextActive]}>
-            Horarios
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'subjects' && styles.tabActive]}
-          onPress={() => setActiveTab('subjects')}
-        >
-          <BookOpen size={20} color={activeTab === 'subjects' ? '#fff' : '#7F8C8D'} />
-          <Text style={[styles.tabText, activeTab === 'subjects' && styles.tabTextActive]}>
-            Materias
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'users' && styles.tabActive]}
-          onPress={() => setActiveTab('users')}
-        >
-          <Users size={20} color={activeTab === 'users' ? '#fff' : '#7F8C8D'} />
-          <Text style={[styles.tabText, activeTab === 'users' && styles.tabTextActive]}>
-            Usuarios
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <Modal visible={tokenModalVisible} transparent animationType="fade">
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmBox}>
+            <Text style={styles.confirmTitle}>Token GitHub</Text>
+            <Text style={styles.confirmMessage}>Ingresa un Personal Access Token con permisos de `repo` para guardar los datos en GitHub. Se guardará localmente.</Text>
+            <TextInput
+              style={[styles.input, { marginTop: 8 }]}
+              value={tokenInput}
+              onChangeText={setTokenInput}
+              placeholder="ghp_..."
+              autoCapitalize="none"
+              secureTextEntry
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+              <TouchableOpacity style={[styles.confirmButton, styles.confirmCancel]} onPress={() => { setTokenModalVisible(false); setTokenInput(''); }}>
+                <Text style={styles.confirmCancelText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmButton, styles.confirmDelete]}
+                onPress={async () => {
+                  setSavingGit(true);
+                  try {
+                    await pushToGitHub?.(tokenInput, 'Manual save from app');
+                    Alert.alert('Guardado', 'Datos guardados en GitHub correctamente');
+                    setTokenModalVisible(false);
+                    setTokenInput('');
+                  } catch (e: any) {
+                    const msg = e?.message || 'Error desconocido';
+                    Alert.alert('Error', `No fue posible guardar en GitHub: ${msg}`);
+                  } finally {
+                    setSavingGit(false);
+                  }
+                }}
+              >
+                <Text style={styles.confirmDeleteText}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.content}>
         {activeTab === 'schedule' && <ScheduleManagement />}
@@ -651,12 +686,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF5E6',
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     gap: 12,
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 16,
+    paddingBottom: 12,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    gap: 12,
   },
   logoutButton: {
     padding: 8,
@@ -665,7 +706,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold' as const,
     color: '#2C3E50',
-    flex: 1,
+    width: '100%',
+    textAlign: 'center',
+    marginTop: 6,
+    lineHeight: 28,
   },
   tabBar: {
     flexDirection: 'row',
@@ -1018,8 +1062,7 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
     fontWeight: '600' as const,
   },
-  logoutButton: {
-    padding: 8,
-    zIndex: 2,
+  syncIcon: {
+    marginRight: 4,
   },
 });

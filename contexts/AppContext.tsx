@@ -183,6 +183,99 @@ export const [AppProvider, useApp] = createContextHook(() => {
     await AsyncStorage.setItem('schedule', JSON.stringify(newSchedule));
   };
 
+  // Push current data to GitHub using the Contents API. Requires a Personal Access Token with repo permissions.
+  const pushToGitHub = async (token?: string, commitMessage?: string) => {
+    const GITHUB_OWNER = 'Memaso-max';
+    const GITHUB_REPO = 'Horario-NJYN-REACT';
+    const DATA_PATH = 'data.json';
+    const META_PATH = 'data_meta.json';
+
+    const usedToken = token || (await AsyncStorage.getItem('githubToken'));
+    if (!usedToken) throw new Error('GitHub token required');
+
+    const apiBase = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`;
+
+    const newLast = new Date().toISOString();
+
+    const dataPayload = {
+      users,
+      subjects,
+      schedule,
+      lastUpdated: newLast,
+    };
+
+    const metaPayload = { lastUpdated: newLast };
+
+    const encode = (obj: any) => {
+      const str = JSON.stringify(obj, null, 2);
+      try {
+        return Buffer.from(str, 'utf8').toString('base64');
+      } catch (e) {
+        // fallback to btoa if available
+        // @ts-ignore
+        if (typeof btoa === 'function') return btoa(str);
+        throw new Error('No base64 encoder available in environment');
+      }
+    };
+
+    const headers = {
+      Authorization: `token ${usedToken}`,
+      Accept: 'application/vnd.github+json',
+    } as any;
+
+    const getSha = async (path: string) => {
+      const res = await fetch(`${apiBase}/${encodeURIComponent(path)}`, { headers });
+      if (res.status === 200) {
+        const j = await res.json();
+        return j.sha as string | null;
+      }
+      return null;
+    };
+
+    const putFile = async (path: string, contentB64: string, message: string, sha?: string | null) => {
+      const body: any = { message, content: contentB64 };
+      if (sha) body.sha = sha;
+      const res = await fetch(`${apiBase}/${encodeURIComponent(path)}`, {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`GitHub API error: ${res.status} ${text}`);
+      }
+      return await res.json();
+    };
+
+    // prepare and push data.json
+    const dataB64 = encode(dataPayload);
+    const metaB64 = encode(metaPayload);
+
+    const message = commitMessage || 'App: update data.json from app';
+
+    const dataSha = await getSha(DATA_PATH);
+    await putFile(DATA_PATH, dataB64, message, dataSha);
+
+    const metaSha = await getSha(META_PATH);
+    await putFile(META_PATH, metaB64, `${message} (meta)`, metaSha);
+
+    // Persist the new lastUpdated locally
+    setLastUpdated(newLast);
+    await AsyncStorage.setItem('lastUpdated', newLast);
+    await AsyncStorage.setItem('users', JSON.stringify(users));
+    await AsyncStorage.setItem('subjects', JSON.stringify(subjects));
+    await AsyncStorage.setItem('schedule', JSON.stringify(schedule));
+
+    // Optionally persist token for future use
+    try {
+      await AsyncStorage.setItem('githubToken', usedToken);
+    } catch (_) {
+      // ignore
+    }
+
+    return { ok: true, lastUpdated: newLast };
+  };
+
   return {
     currentUser,
     users,
@@ -203,6 +296,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     deleteClassPeriod,
     // allow manual/forced sync (admin can call this)
     forceSync: syncFromRemote,
+    pushToGitHub,
   };
 });
 
