@@ -36,8 +36,11 @@ export function AdminPanel() {
             setIsSyncing(true);
             try {
               await forceSync?.();
+              Alert.alert('Sincronización', 'Actualizado correctamente');
             } catch (e: any) {
-              setSyncError(e?.message || 'Error al sincronizar');
+              const msg = e?.message || 'No fue posible sincronizar';
+              setSyncError(msg);
+              Alert.alert('Sincronización', `No fue posible sincronizar: ${msg}`);
             } finally {
               setIsSyncing(false);
             }
