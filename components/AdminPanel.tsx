@@ -27,9 +27,6 @@ export function AdminPanel() {
       <View style={styles.header}>
         <Settings size={28} color="#E67E22" strokeWidth={2.5} />
         <Text style={styles.headerTitle}>Panel de Administración</Text>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <LogOut size={24} color="#E67E22" />
-        </TouchableOpacity>
         <TouchableOpacity
           onPress={async () => {
             setSyncError(null);
@@ -48,6 +45,9 @@ export function AdminPanel() {
           style={styles.syncButton}
         >
           <Text style={styles.syncText}>{isSyncing ? 'Sincronizando...' : 'Sincronizar'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <LogOut size={24} color="#E67E22" />
         </TouchableOpacity>
       </View>
 
@@ -635,13 +635,13 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   logoutButton: {
-    marginLeft: 'auto',
     padding: 8,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold' as const,
     color: '#2C3E50',
+    flex: 1,
   },
   tabBar: {
     flexDirection: 'row',
@@ -709,6 +709,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
+    paddingBottom: 120,
   },
   itemCard: {
     flexDirection: 'row',
