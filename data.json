@@ -40,21 +40,6 @@
       "name": "Administrador",
       "role": "admin",
       "password": "V.27962617"
-    },
-    {
-      "id": "u1771081344420",
-      "name": "Dilia pacheco ",
-      "role": "teacher"
-    },
-    {
-      "id": "u1771081345918",
-      "name": "Dilia pacheco ",
-      "role": "teacher"
-    },
-    {
-      "id": "u1771081346867",
-      "name": "Dilia pacheco ",
-      "role": "teacher"
     }
   ],
   "subjects": [
@@ -365,5 +350,5 @@
       "group": "A"
     }
   ],
-  "lastUpdated": "2026-02-14T15:02:43.207Z"
+  "lastUpdated": "2026-02-14T15:03:34.483Z"
 }
