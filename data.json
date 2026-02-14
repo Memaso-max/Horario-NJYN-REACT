@@ -12,7 +12,7 @@
     },
     {
       "id": "t3",
-      "name": "Prof. Cruz S·nchez",
+      "name": "Prof. Cruz S√°nchez",
       "role": "teacher"
     },
     {
@@ -40,35 +40,30 @@
       "name": "Administrador",
       "role": "admin",
       "password": "V.27962617"
-    },
-    {
-      "id": "u1770747664855",
-      "name": "Pepito",
-      "role": "teacher"
     }
   ],
   "subjects": [
     {
       "id": "s1",
-      "name": "Matem·ticas",
+      "name": "Matem√°ticas",
       "teacherId": "t1",
       "color": "#FF6B6B"
     },
     {
       "id": "s2",
-      "name": "FÌsica",
+      "name": "F√≠sica",
       "teacherId": "t1",
       "color": "#4ECDC4"
     },
     {
       "id": "s3",
-      "name": "Matem·ticas",
+      "name": "Matem√°ticas",
       "teacherId": "t2",
       "color": "#45B7D1"
     },
     {
       "id": "s4",
-      "name": "InglÈs",
+      "name": "Ingl√©s",
       "teacherId": "t3",
       "color": "#FFA07A"
     },
@@ -86,13 +81,13 @@
     },
     {
       "id": "s7",
-      "name": "EducaciÛn FÌsica",
+      "name": "Educaci√≥n F√≠sica",
       "teacherId": "t6",
       "color": "#C77DFF"
     },
     {
       "id": "s8",
-      "name": "BiologÌa",
+      "name": "Biolog√≠a",
       "teacherId": "t7",
       "color": "#FF8FAB"
     },
