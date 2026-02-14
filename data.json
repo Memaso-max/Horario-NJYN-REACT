@@ -12,7 +12,7 @@
     },
     {
       "id": "t3",
-      "name": "Prof. Cruz S√°nchez",
+      "name": "Prof. Cruz S·nchez",
       "role": "teacher"
     },
     {
@@ -45,25 +45,25 @@
   "subjects": [
     {
       "id": "s1",
-      "name": "Matem√°ticas",
+      "name": "Matem·ticas",
       "teacherId": "t1",
       "color": "#FF6B6B"
     },
     {
       "id": "s2",
-      "name": "F√≠sica",
+      "name": "FÌsica",
       "teacherId": "t1",
       "color": "#4ECDC4"
     },
     {
       "id": "s3",
-      "name": "Matem√°ticas",
+      "name": "Matem·ticas",
       "teacherId": "t2",
       "color": "#45B7D1"
     },
     {
       "id": "s4",
-      "name": "Ingl√©s",
+      "name": "InglÈs",
       "teacherId": "t3",
       "color": "#FFA07A"
     },
@@ -81,13 +81,13 @@
     },
     {
       "id": "s7",
-      "name": "Educaci√≥n F√≠sica",
+      "name": "EducaciÛn FÌsica",
       "teacherId": "t6",
       "color": "#C77DFF"
     },
     {
       "id": "s8",
-      "name": "Biolog√≠a",
+      "name": "BiologÌa",
       "teacherId": "t7",
       "color": "#FF8FAB"
     },
@@ -350,5 +350,5 @@
       "group": "A"
     }
   ],
-  "lastUpdated": "2026-02-10T18:21:15.704Z"
+  "lastUpdated": "2026-02-14T15:02:24.496Z"
 }
